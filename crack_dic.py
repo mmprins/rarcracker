@@ -3,7 +3,7 @@
 import subprocess,os,sys
 from multiprocessing import Pool,Manager
 class cracker(object):
-    def __init__(self,filename='test.7z',filetype='7za',dictfile='test.txt',COUNT=0,target_file=None):
+    def __init__(self,filename='test.7z',filetype='7za',dictfile='wordlist.txt',COUNT=0,target_file=None):
         self.filename=filename
         self.filetype=filetype
         self.dictfile=dictfile
@@ -11,7 +11,7 @@ class cracker(object):
         self.target_file=target_file
         self.PASSWD=''
     def _subproc(self,passwd,filename,q):
-        if subprocess.call([self.filetype,'t','-p%s'%passwd,filename,self.target_file],stdout = open('/dev/null','w'),stderr = subprocess.STDOUT):
+        if subprocess.call([self.filetype,'x','-p%s'%passwd,filename,self.target_file],stdout = open('/dev/null','w'),stderr = subprocess.STDOUT):
             print('%d passwd %s test faild'%(self.COUNT,passwd))
         else:
             print('the correct passwd is:%s'%passwd)
@@ -56,11 +56,9 @@ class cracker(object):
                     break
 if __name__=='__main__':
     if len(sys.argv) > 1:
-        #target_file='test.py'
-        target_file='ASTM_2015_Standards/ASTM 2015 PART IA/ASTM 2015 Volume 01.01 Steel - Piping, Tubing, Fittings/A1014A1014M-10_Standard_Specification_for_Precipitation-Hardening_Bolting_(UNS_N07718)_for_High_Temperature_Service.pdf'
-        #COUNT=0
-        COUNT=44072
-        sss=cracker(sys.argv[1],filetype='unrar',dictfile='28GBwordlist.dic',COUNT=COUNT,target_file=target_file)
+        target_file='form.csv'
+        COUNT=0
+        sss=cracker(sys.argv[1],filetype='unrar',dictfile='wordlist.txt',COUNT=COUNT,target_file=target_file)
         sss.cracktest()
     else:
         pass
