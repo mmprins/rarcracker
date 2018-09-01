@@ -3,18 +3,18 @@
 import subprocess,os,sys
 from multiprocessing import Pool,Manager,Process
 class cracker(object):
-    def __init__(self,filename,filetype,dictfile,COUNT,target_file):
+    def __init__(self,filename,filetype,COUNT,target_file,dictfile):
         self.filename=filename
         self.filetype=filetype
-        self.dictfile=dictfile
         self.COUNT=COUNT
         self.target_file=target_file
+        self.dictfile=dictfile
         self.PASSWD=''
         self.q=Manager().Queue()
     def _subproc(self,passwd,filename,q):
         '''subprocess.call 运行程序完全正常执行返回0,否则按照不同错误返回其他值'''
         if subprocess.call([self.filetype,'t','-y','-p%s'%passwd,filename,self.target_file],stdout = open('/dev/null','w'),stderr = subprocess.STDOUT):
-            print('%d passwd %s test failed'%(self.COUNT,passwd))
+            print('NU:%d passwd=%s test failed'%(self.COUNT,passwd))
         else:#subprocess.call返回0即密码测试成功
             q.put(passwd)
     def _wordlist(self):#内置破解字典生成器,6位纯数字
@@ -74,17 +74,17 @@ class cracker(object):
 if __name__=='__main__':
     filename='test.7z'
     filetype='7za'
-    dictfile='buildin'
     COUNT=0#用于恢复被中断的破解过程
     target_file=''#指定单个测试用目标文件文件
-    args=['',filename,filetype,dictfile,COUNT,target_file] 
+    dictfile='buildin'
+    args=['',filename,filetype,COUNT,target_file,dictfile] 
     if len(sys.argv) > 1:
         for i in range(len(sys.argv)):
             args[i]=sys.argv[i]#根据sys.argv重置参数值
-        sss=cracker(args[1],args[2],args[3],args[4],args[5])
-        if args[3] == 'buildin':
+        sss=cracker(args[1],args[2],int(args[3]),args[4],args[5])
+        if args[5] == 'buildin':
             sss.CrackFromBuildin()
         else:
             sss.CrackFromDicfile()
     else:
-        print("useage : crack [filename] [7za|unrar] [dictfile] [COUNT] [target_file]") 
+        print("useage : crack [filename] [7za|unrar] [COUNT] [target_file] [dictfile] ") 
