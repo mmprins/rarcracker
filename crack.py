@@ -48,10 +48,10 @@ class cracker(object):
     def CrackFromDicfile(self):#使用外部字典表文件检验密码
         with open(self.dictfile,'r') as fp:
             subprocount=0#初始化subproc计数
+            for i in range(self.COUNT):#跳过上次已完成检验任务
+                fp.readline()
             while True:
                 passwd_test=fp.readline()
-                for i in range(self.COUNT):#跳过上次已完成检验任务
-                    fp.readline()
                 if not self.q.empty():#队列q非空取值时即为正确密码
                     self.PASSWD=self.q.get()
                     print('PASSWD=%s'%self.PASSWD)
