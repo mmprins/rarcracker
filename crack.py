@@ -3,11 +3,15 @@
 import subprocess,os,sys
 from multiprocessing import Pool,Manager,Process
 class cracker(object):
-    def __init__(self,filename,filetype,COUNT,target_file,dictfile):
+    def __init__(self,filename,filetype='7za',COUNT=0,target_file='./',dictfile='buildin'):
         self.filename=filename
         self.filetype=filetype
         self.COUNT=COUNT
-        self.target_file=target_file
+        if self.filetype == '7za':
+            if target_file == './':
+                self.target_file=""
+        else:
+            self.target_file=target_file
         self.dictfile=dictfile
         self.PASSWD=''
         self.q=Manager().Queue()
@@ -72,19 +76,53 @@ class cracker(object):
                         P.join()
                         subprocount=0#子程序运行结束，重置subprocount数量归0
 if __name__=='__main__':
-    filename='test.7z'
+    filename=''
     filetype='7za'
     COUNT=0#用于恢复被中断的破解过程
-    target_file=''#指定单个测试用目标文件文件
+    target_file='./'#指定单个测试用目标文件文件
     dictfile='buildin'
-    args=['',filename,filetype,COUNT,target_file,dictfile] 
-    if len(sys.argv) > 1:
-        for i in range(len(sys.argv)):
-            args[i]=sys.argv[i]#根据sys.argv重置参数值
-        sss=cracker(args[1],args[2],int(args[3]),args[4],args[5])
-        if args[5] == 'buildin':
+    def parameters(args):
+        global filename,filetype,COUNT,target_file,dictfile
+        if len(args) == 1:
+            print("useage : crack [-f filename] [-t 7za|unrar] [-N COUNT] [-T target_file] [-d bulidin|dictfile] ")
+            return -1
+        for arg in args:
+            if arg[0] == '-':
+                if not arg in ('-f','-t','-N','-d','-T'):
+                    print('parameter "%s" was not definded'%arg)
+                    return -1
+        if '-f' in args:#压缩文件名称
+            if os.path.exists(args[args.index('-f')+1]):
+                filename=args[args.index('-f')+1]
+            else:
+                print("filename is not exists")
+                return -1
+        else:
+            print("filename must be specified!")
+            return -1
+        if '-t' in args:#压缩文件类型，支持7za和unrar两种类型
+            if not args[args.index('-t')+1] in ['7za','unrar']:
+                print("unsupported filetype definded!")
+                return -1
+            filetype=args[args.index('-t')+1]
+        if '-N' in args:#用于恢复被中断的破解过程
+            try:
+                COUNT=int(args[args.index('-N')+1])
+            except:
+                print("COUNT must be a int number!")
+                return -1
+        if '-d' in args:#指定使用的外部字典文件
+            if os.path.exists(args[args.index('-d')+1]):
+                dictfile=args[args.index('-d')+1]
+            else:
+                print("filename is not exists")
+                return -1
+        if '-T' in args:#指定压缩包内单个测试用目标文件
+                target_file=args[args.index('-T')+1]
+        return 0
+    if parameters(sys.argv) == 0:
+        sss=cracker(filename,filetype,COUNT,target_file,dictfile)
+        if dictfile == 'buildin':
             sss.CrackFromBuildin()
         else:
             sss.CrackFromDicfile()
-    else:
-        print("useage : crack [filename] [7za|unrar] [COUNT] [target_file] [dictfile] ") 
