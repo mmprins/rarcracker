@@ -2,6 +2,69 @@
 # _*_ coding:utf-8 _*_
 import subprocess,os,sys
 from multiprocessing import Pool,Manager,Process
+from tkinter import *
+def __parameters(args):
+    global filename,filetype,COUNT,target_file,dictfile
+    if len(args) == 1:
+        print("useage : crack [-f filename] [-t 7za|unrar] [-N COUNT] [-T target_file] [-d bulidin|dictfile] ")
+        return -1
+    for arg in args:
+        if arg[0] == '-':
+            if not arg in ('-f','-t','-N','-d','-T'):
+                print('parameter "%s" was not definded'%arg)
+                return -1
+    if '-f' in args:#压缩文件名称
+        if os.path.exists(args[args.index('-f')+1]):
+            filename=args[args.index('-f')+1]
+        else:
+            print("filename is not exists")
+            return -1
+    else:
+        print("filename must be specified!")
+        return -1
+    if '-t' in args:#压缩文件类型，支持7za和unrar两种类型
+        if not args[args.index('-t')+1] in ['7za','unrar']:
+            print("unsupported filetype definded!")
+            return -1
+        filetype=args[args.index('-t')+1]
+    if '-N' in args:#用于恢复被中断的破解过程
+        try:
+            COUNT=int(args[args.index('-N')+1])
+        except:
+            print("COUNT must be a int number!")
+            return -1
+    if '-d' in args:#指定使用的外部字典文件
+        if os.path.exists(args[args.index('-d')+1]):
+            dictfile=args[args.index('-d')+1]
+        else:
+            print("filename is not exists")
+            return -1
+    if '-T' in args:#指定压缩包内单个测试用目标文件
+            target_file=args[args.index('-T')+1]
+    return 0
+def guistart():
+    root=Tk()
+    guisubproc=GUI(root)
+    guisubproc.mainloop()
+    guisubproc.destroy()
+    root.destroy()
+class GUI(Frame):
+    def __init__(self,master=None):
+        Frame.__init__(self,master,height=300,width=300)
+        self.vtype=IntVar()
+        self.pack(fill=X,padx=5,pady=5)
+        self.createWidgets()
+    def createWidgets(self):
+        self.mainLabel=Label(self,text='RAR/7zip files crack application')
+        self.mainLabel.pack()
+        self.quitButton=Button(self,text='quit',command=self.quit).pack(side=BOTTOM)
+        self.confirmButton=Button(self,text='confirm',command=self.quit).pack(side=BOTTOM)
+        self.radiobutton(self.vtype)
+    def radiobutton(self,value):
+        vtype=value
+        vtype.set(0)
+        self.radioButton1=Radiobutton(self,text='7za',variable=vtype,value=0).pack()
+        self.radioButton2=Radiobutton(self,text='Rar',variable=vtype,value=1).pack()
 class cracker(object):
     def __init__(self,filename,filetype='7za',COUNT=0,target_file='./',dictfile='buildin'):
         self.filename=filename
@@ -81,46 +144,7 @@ if __name__=='__main__':
     COUNT=0#用于恢复被中断的破解过程
     target_file='./'#指定单个测试用目标文件文件
     dictfile='buildin'
-    def parameters(args):
-        global filename,filetype,COUNT,target_file,dictfile
-        if len(args) == 1:
-            print("useage : crack [-f filename] [-t 7za|unrar] [-N COUNT] [-T target_file] [-d bulidin|dictfile] ")
-            return -1
-        for arg in args:
-            if arg[0] == '-':
-                if not arg in ('-f','-t','-N','-d','-T'):
-                    print('parameter "%s" was not definded'%arg)
-                    return -1
-        if '-f' in args:#压缩文件名称
-            if os.path.exists(args[args.index('-f')+1]):
-                filename=args[args.index('-f')+1]
-            else:
-                print("filename is not exists")
-                return -1
-        else:
-            print("filename must be specified!")
-            return -1
-        if '-t' in args:#压缩文件类型，支持7za和unrar两种类型
-            if not args[args.index('-t')+1] in ['7za','unrar']:
-                print("unsupported filetype definded!")
-                return -1
-            filetype=args[args.index('-t')+1]
-        if '-N' in args:#用于恢复被中断的破解过程
-            try:
-                COUNT=int(args[args.index('-N')+1])
-            except:
-                print("COUNT must be a int number!")
-                return -1
-        if '-d' in args:#指定使用的外部字典文件
-            if os.path.exists(args[args.index('-d')+1]):
-                dictfile=args[args.index('-d')+1]
-            else:
-                print("filename is not exists")
-                return -1
-        if '-T' in args:#指定压缩包内单个测试用目标文件
-                target_file=args[args.index('-T')+1]
-        return 0
-    if parameters(sys.argv) == 0:
+    if __parameters(sys.argv) == 0:
         sss=cracker(filename,filetype,COUNT,target_file,dictfile)
         if dictfile == 'buildin':
             sss.CrackFromBuildin()
